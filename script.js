@@ -1,62 +1,49 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const divs = document.querySelectorAll('.image');
-
+document.addEventListener("DOMContentLoaded", function () {
   let draggedItem = null;
 
-  divs.forEach(div => {
-    div.setAttribute('draggable', true); // Add draggable attribute
-    div.addEventListener('dragstart', dragStart);
-    div.addEventListener('dragover', dragOver);
-    div.addEventListener('dragenter', dragEnter);
-    div.addEventListener('dragleave', dragLeave);
-    div.addEventListener('drop', dragDrop);
-    div.addEventListener('dragend', dragEnd);
+  // Add dragstart event listener to each draggable div
+  document.querySelectorAll(".image").forEach(function (div) {
+    div.addEventListener("dragstart", function (e) {
+      draggedItem = div;
+      setTimeout(function () {
+        div.style.display = "none";
+      }, 0);
+    });
+
+    div.addEventListener("dragend", function () {
+      setTimeout(function () {
+        draggedItem.style.display = "block";
+        draggedItem = null;
+      }, 0);
+    });
   });
 
-  function dragStart() {
-    draggedItem = this;
-    setTimeout(() => {
-      this.style.opacity = '0.5'; // Reduce opacity instead of setting display to 'none'
-    }, 0);
-  }
+  // Add dragover event listener to each droppable div
+  document.querySelectorAll(".image").forEach(function (div) {
+    div.addEventListener("dragover", function (e) {
+      e.preventDefault();
+    });
 
-  function dragOver(e) {
-    e.preventDefault();
-  }
+    div.addEventListener("dragenter", function (e) {
+      e.preventDefault();
+      div.classList.add("selected");
+    });
 
-  function dragEnter() {
-    this.classList.add('selected');
-  }
+    div.addEventListener("dragleave", function () {
+      div.classList.remove("selected");
+    });
 
-  function dragLeave() {
-    this.classList.remove('selected');
-  }
+    div.addEventListener("drop", function () {
+      if (draggedItem !== null) {
+        // Swap the background images
+        const tempBackground = draggedItem.style.backgroundImage;
+        draggedItem.style.backgroundImage = div.style.backgroundImage;
+        div.style.backgroundImage = tempBackground;
 
-  function dragDrop() {
-    if (draggedItem !== this) {
-      const temp = this.innerHTML;
-      this.innerHTML = draggedItem.innerHTML;
-      draggedItem.innerHTML = temp;
-    }
-
-    this.classList.remove('selected');
-  }
-
-  function dragEnd() {
-    this.style.opacity = '1'; // Restore opacity after the drag operation
-    draggedItem = null;
-  });
-
-  // Clean up event listeners when the component is no longer needed
-  document.addEventListener('beforeunload', () => {
-    divs.forEach(div => {
-      div.removeAttribute('draggable'); // Remove draggable attribute
-      div.removeEventListener('dragstart', dragStart);
-      div.removeEventListener('dragover', dragOver);
-      div.removeEventListener('dragenter', dragEnter);
-      div.removeEventListener('dragleave', dragLeave);
-      div.removeEventListener('drop', dragDrop);
-      div.removeEventListener('dragend', dragEnd);
+        // Reset classes
+        div.classList.remove("selected");
+        draggedItem = null;
+      }
     });
   });
 });
